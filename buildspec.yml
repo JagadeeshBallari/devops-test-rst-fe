@@ -1,0 +1,83 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16  # Specify the Node.js version you want to use
+    commands:
+      - echo Installing dependencies...
+      - npm install
+      - npm install -g eslint   # Install any pre-build tools (optional, like linters)
+
+# Building docker image and pushing to ECR
+  pre_build:
+    commands:
+      - echo pre build Process started....
+      - echo Logging in to Amazon ECR...
+      - REPO_URI=992382740202.dkr.ecr.us-east-1.amazonaws.com/rst   # ECR repository URI
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)  # Get the first 7 characters of the Git commit hash
+      - IMAGE_TAG=${COMMIT_HASH}  # Use the commit hash as the image tag
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 992382740202.dkr.ecr.us-east-1.amazonaws.com
+      
+      # # Docker Hub login
+      # - echo Logging in to Docker Hub...
+      # - docker login -u $(aws ssm get-parameter --name "/dockerhub/username" --with-decryption --query "Parameter.Value" --output text) -p $(aws ssm get-parameter --name "/dockerhub/password" --with-decryption --query "Parameter.Value" --output text)
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $REPO_URI:latest -t $REPO_URI:$IMAGE_TAG -f Dockerfile .
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image to ECR...
+      - docker push $REPO_URI:latest
+      - docker push $REPO_URI:$IMAGE_TAG
+
+
+## building .zip package and moved to s3
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: yes
+  base-directory: .
+  name: RST_FE
+  destination: acp-vpc-flowlogs-992382740202-bucket/builds  # s3 bucket storage
+
+cache:
+  paths:
+    - node_modules/**/*  # Cache `node_modules` to speed up future builds
+
+
+
+
+
+# version: 0.2
+
+# phases:
+#   pre_build:
+#     commands:
+#       - echo Logging in to Amazon ECR...
+#       - aws --version
+#       - (Get-ECRLoginCommand).Password | docker login --username AWS --password-stdin 992382740202.dkr.ecr.us-east-1.amazonaws.com
+# #      - $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 992382740202.dkr.ecr.us-east-1.amazonaws.com)
+#       - REPO_URI=992382740202.dkr.ecr.us-east-1.amazonaws.com/rst
+#       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+#       - IMAGE_TAG=${COMMIT_HASH}
+
+#   build:
+#     commands:
+#       - echo Build started on `date`
+#       - echo Building the Docker image...
+#       - docker build -t $REPO_URI:latest -t $REPO_URI:$IMAGE_TAG -f Dockerfile .
+
+#   post_build:
+#     commands:
+#       - echo Build completed on `date`
+#       - echo Pushing the Docker image to ECR...
+#       - docker push $REPO_URI:latest
+#       - docker push $REPO_URI:$IMAGE_TAG
+
+

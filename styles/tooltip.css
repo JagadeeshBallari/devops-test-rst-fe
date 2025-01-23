@@ -1,0 +1,32 @@
+/* styles/tooltip.css */
+.tooltip-content {
+  visibility: hidden; /* Hide the tooltip by default */
+  width: 650px; /* Adjust width as needed */
+  background-color: #F5F5F5;
+  
+  color: #000; /* Text color */
+  text-align: left; /* Text alignment */
+  border-radius: 5px; /* Rounded corners */
+  border-color: #060B86;
+  border-style: solid;
+  border-width: 1px;
+  padding: 10px; /* Padding inside the tooltip */
+  position: absolute; /* Positioning relative to the parent */
+  z-index: 10; /* Ensure it's above other content */
+  top: 80%;
+  left: 50%;
+  transform: translateX(0%); /* Center the tooltip */
+  opacity: 0; /* Invisible by default */
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+/* Show the tooltip on hover */
+.tooltip-wrapper:hover .tooltip-content {
+  visibility: visible; 
+  opacity: 1;
+}
+
+.tooltip-wrapper {
+  position: relative; /* Ensure the tooltip positions correctly relative to the trigger */
+  display: inline-block;
+}
