@@ -31,7 +31,7 @@ pipeline {
         // }
         stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: 'build/**', fingerprint: true
+                archiveArtifacts artifacts: '.next/**', fingerprint: true
             }
         }
     }
