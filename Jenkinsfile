@@ -29,5 +29,10 @@ pipeline {
         //         sh 'npm test'  // Optional, skip if no tests
         //     }
         // }
+        stage('Archive Artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'build/**', fingerprint: true
+            }
+        }
     }
 }
